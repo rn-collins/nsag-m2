@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M2 Readiness Assessment — AI Legal Navigation | NSAG</title>
+<meta name="robots" content="index, follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Syne:wght@400;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--nsag:#4D45A8;--accent:#1E3651;--accent-pale:rgba(30,54,81,0.08);--bg:#F6F3EC;--white:#FFFFFF;--text:#1C1B1F;--text-muted:#5A5869;--border:#D8D5CE}
+  body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+  nav{background:var(--white);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .nav-brand{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--nsag);letter-spacing:0.06em;text-decoration:none}
+  .nav-mod{font-family:'Syne',sans-serif;font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent)}
+  .hero{background:var(--accent);color:white;padding:3rem 2rem;text-align:center}
+  .hero-label{font-family:'Syne',sans-serif;font-size:0.68rem;letter-spacing:0.2em;text-transform:uppercase;opacity:0.7;margin-bottom:0.75rem}
+  .hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:600;margin-bottom:1rem;line-height:1.2}
+  .hero-meta{font-size:0.82rem;opacity:0.75;letter-spacing:0.03em}
+  .hero-problem{max-width:680px;margin:1.5rem auto 0;font-size:0.95rem;line-height:1.8;opacity:0.88}
+  .progress-wrap{background:var(--white);border-bottom:1px solid var(--border);padding:0.75rem 2rem;position:sticky;top:61px;z-index:90;display:none}
+  .progress-bar-bg{background:var(--border);border-radius:3px;height:4px;max-width:700px;margin:0 auto}
+  .progress-bar{background:var(--accent);height:4px;border-radius:3px;transition:width 0.3s ease;width:0%}
+  .progress-text{font-family:'Syne',sans-serif;font-size:0.68rem;letter-spacing:0.1em;color:var(--text-muted);text-align:center;margin-top:0.4rem}
+  .container{max-width:700px;margin:0 auto;padding:0 2rem}
+  .assessment-wrap{padding:2rem 0 4rem}
+  .q-block{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:1.75rem;margin-bottom:1.25rem;display:none}
+  .q-block.active{display:block}
+  .q-num{font-family:'Syne',sans-serif;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.3rem}
+  .q-dim{font-family:'Syne',sans-serif;font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;margin-bottom:0.75rem}
+  .q-text{font-size:1rem;line-height:1.7;margin-bottom:1.25rem}
+  .q-options{display:flex;flex-direction:column;gap:0.5rem}
+  .q-opt{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.9rem;border:1px solid var(--border);border-radius:5px;cursor:pointer;transition:all 0.15s;font-size:0.88rem}
+  .q-opt:hover,.q-opt.selected{border-color:var(--accent);background:var(--accent-pale)}
+  .q-opt.selected{font-weight:600}
+  .q-opt input{accent-color:var(--accent);width:15px;height:15px;cursor:pointer}
+  .q-nav{display:flex;gap:0.75rem;margin-top:1.25rem}
+  .btn-prev{background:none;border:1px solid var(--border);color:var(--text-muted);font-family:'Syne',sans-serif;font-size:0.8rem;padding:0.6rem 1.25rem;border-radius:4px;cursor:pointer}
+  .btn-next{background:var(--accent);border:none;color:white;font-family:'Syne',sans-serif;font-size:0.8rem;font-weight:600;padding:0.6rem 1.5rem;border-radius:4px;cursor:pointer;flex:1}
+  .btn-next:disabled{opacity:0.4;cursor:not-allowed}
+  .gate{display:none;background:var(--white);border:1px solid var(--border);border-radius:8px;padding:2.5rem;text-align:center;margin-top:2rem}
+  .gate.active{display:block}
+  .gate-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;margin-bottom:0.5rem}
+  .gate-sub{font-size:0.9rem;color:var(--text-muted);margin-bottom:1.5rem;line-height:1.6}
+  .gate-input{width:100%;border:1px solid var(--border);border-radius:5px;padding:0.75rem 1rem;font-family:'Manrope',sans-serif;font-size:0.95rem;margin-bottom:0.75rem}
+  .gate-btn{width:100%;background:var(--nsag);color:white;border:none;border-radius:5px;padding:0.85rem;font-family:'Syne',sans-serif;font-weight:600;font-size:0.9rem;cursor:pointer}
+  .results{display:none}
+  .results.active{display:block}
+  .tier-banner{border-radius:8px;padding:2.5rem;text-align:center;margin-bottom:2rem;color:white}
+  .tier-label{font-family:'Syne',sans-serif;font-size:0.68rem;letter-spacing:0.2em;text-transform:uppercase;opacity:0.8;margin-bottom:0.5rem}
+  .tier-name{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:600;margin-bottom:0.5rem}
+  .tier-score{font-size:0.9rem;opacity:0.85}
+  .dims-section,.rec-section{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:1.75rem;margin-bottom:1.5rem}
+  .dims-title,.rec-title{font-family:'Syne',sans-serif;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:1.25rem}
+  .dim-row{display:grid;grid-template-columns:160px 1fr 50px;align-items:center;gap:0.75rem;margin-bottom:0.9rem}
+  .dim-label{font-size:0.8rem;font-weight:500}
+  .dim-bar-wrap{background:var(--border);border-radius:3px;height:6px;overflow:hidden}
+  .dim-bar{height:6px;border-radius:3px;transition:width 0.8s ease;width:0%}
+  .dim-score{font-family:'Syne',sans-serif;font-size:0.72rem;color:var(--text-muted);text-align:right}
+  .rec-text{font-size:0.92rem;line-height:1.8}
+  .cta-block{text-align:center;padding:2rem;background:var(--nsag);border-radius:8px;color:white;margin-bottom:1.5rem}
+  .cta-block h3{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;margin-bottom:0.5rem}
+  .cta-block p{font-size:0.88rem;opacity:0.85;margin-bottom:1.25rem}
+  .cta-btn{display:inline-block;background:white;color:var(--nsag);font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem;padding:0.75rem 2rem;border-radius:4px;text-decoration:none}
+  .copy-btn{display:block;margin:1rem auto 0;background:none;border:1px solid rgba(255,255,255,0.4);color:white;font-family:'Syne',sans-serif;font-size:0.75rem;letter-spacing:0.08em;padding:0.4rem 1rem;border-radius:3px;cursor:pointer}
+  footer{background:#2A2730;color:rgba(255,255,255,0.7);text-align:center;padding:1.5rem;font-size:0.78rem}
+  footer a{color:rgba(255,255,255,0.9)}
+  @media(max-width:600px){.dim-row{grid-template-columns:1fr 80px}.dim-label{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-brand" href="https://nsag-site.vercel.app">NSAG</a>
+  <span class="nav-mod">M2 · AI Legal Navigation</span>
+</nav>
+<div class="hero">
+  <div class="hero-label">Free Readiness Assessment</div>
+  <h1 class="hero-title">AI Legal Navigation</h1>
+  <div class="hero-meta">12 questions &nbsp;·&nbsp; 6 dimensions &nbsp;·&nbsp; 8–10 minutes</div>
+  <p class="hero-problem">AI tools are now embedded in legal contexts that affect millions — risk assessment instruments in bail, benefits eligibility algorithms, predictive policing systems. Most of the people affected don't know these tools are used. Most organizations using them can't explain how they work.</p>
+</div>
+<div class="progress-wrap" id="progress-wrap">
+  <div class="progress-bar-bg"><div class="progress-bar" id="progress-bar"></div></div>
+  <div class="progress-text" id="progress-text">Question 1 of 12</div>
+</div>
+<div class="container">
+  <div class="assessment-wrap">
+    <div id="intro-card" style="background:var(--white);border:1px solid var(--border);border-radius:8px;padding:2rem;margin-bottom:1.25rem;text-align:center;">
+      <p style="font-size:0.92rem;line-height:1.8;color:var(--text-muted);margin-bottom:1.5rem;">This assessment scores your organization across six dimensions. Each question uses a five-point scale. Your tier report is generated immediately after you submit your email — no waiting, no sales call required.</p>
+      <p style="font-family:'Syne',sans-serif;font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:1rem;">For: Court innovation offices · Legal aid tech teams · Public defender AI tools · Access-to-justice organizations</p>
+      <button onclick="startAssessment()" style="background:var(--accent);color:white;border:none;border-radius:4px;padding:0.85rem 2.5rem;font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;">Begin Assessment →</button>
+    </div>
+    
+        <div class="q-block" id="q1">
+          <div class="q-num">Q1 of 12</div>
+          <div class="q-dim" style="color:#1E3651">AI Tool Transparency & Explainability</div>
+          <p class="q-text">Can your organization produce a plain-language explanation of how each AI tool used in legal decision-making works — including what data it uses and what it predicts or recommends?</p>
+          <div class="q-options">
+            <label class="q-opt"><input type="radio" name="q1" value="0"> <span>Not in place</span></label>
+            <label class="q-opt"><input type="radio" name="q1" value="1"> <span>Rarely / minimal</span></label>
+            <label class="q-opt"><input type="radio" name="q1" value="2"> <span>Partially in place</span></label>
+            <label class="q-opt"><input type="radio" name="q1" value="3"> <span>Mostly in place</span></label>
+            <label class="q-opt"><input type="radio" name="q1" value="4"> <span>Fully in place</span></label>
+          </div>
+        </div>
+        <div class="q-block" id="q2">
+          <div class="q-num">Q2 of 12</div>
+          <div class="q-dim" style="color:#1E3651">AI Tool Transparency & Explainability</div>
+          <p class="q-text">Does your organization maintain an up-to-date inventory of all AI tools that influence legal decisions, including those operated by third-party vendors or government agencies?</p>
+          <div class="q-options">
+            <label class="q-opt"><input type="radio" name="q2" value="0"> <span>Not in place</span></label>
+            <label class="q-opt"><input type="radio" name="q2" value="1"> <span>Rarely / minimal</span></label>
+            <label class="q-opt"><input type="radio" name="q2" value="2"> <span>Partially in place</span></label>
+            <label class="q-opt"><input type="radio" name="q2" value="3"> <span>Mostly in place</span></label>
+            <label class="q-opt"><input type="radio" name="q2" value="4"> <span>Fully in place</span></label>
+          </div>
+        </div>
+        <div class="q-block" id="q3">
+          <div class="q-num">Q3 of 12</div>
+          <div class="q-dim" style="color:#1E3651">Bias Audit & Demographic Impact</div>
+          <p class="q-text">Has each AI tool in use at your organization been independently audited for demographic disparities in outcomes — including race, gender, age, language, and disability status?</p>
+          <div class="q-options">
+            <label class="q-opt"><input type="radio" name="q3" value="0"> <span>Not in place</span></label>
+            <label class="q-opt"><input type="radio" name="q3" value="1"> <span>Rarely / minimal</span></label>
+            <label class="q-opt"><input type="radio" name="q3" value="2"> <span>Partially in place</span></label>
+            <label class="q-opt"><input type="radio" name="q3" value="3"> <span>Mostly in place</span></label>
+            <label class="q-opt"><input type="radio" name="q3" value="4"> <span>Fully in place</span></label>
+          </div>
+        </div>
+        <div class="q-block" id="q4">
+          <div class="q-num">Q4 of 12</div>
+          <div class="q-dim" style="color:#1E3651">Bias Audit & Demographic Impact</div>
+          <p class="q-text">Does your organization review AI tool performance data by demographic category at regular intervals — and is there a defined disparity threshold that would trigger suspension or replacement of a tool?</p>
+          <div class="q-options">
+            <label class="q-opt"><input type="radio" name="q4" value="0"> <span>Not in place</span></label>
+            <label class="q-opt"><input type="radio" name="q4" value="1"> <span>Rarely / minimal</span></label>
+            <label class="q-opt"><input type="radio" name="q4" value="2"> <span>Partially in place</span></label>
+            <label class="q-opt"><input type="radio" name="q4" value="3"> <span>Mostly in place</span></label>
+            <label class="q-opt"><input type="radio" name="q4" value="4"> <span>Fully in place</span></label>
+          </div>
+        </div>
+        <div class="q-block" id="q5">
+          <div class="q-num">Q5 of 12</div>
+          <div class="q-dim" style="color:#1E3651">Human Oversight & Override Protocols</div>
+          <p class="q-text">Does your organization have a formal protocol for human review of AI-generated recommendations before they influence a legal decision affecting a specific individual?</p>
+          <div class="q-options">
+            <label class="q-opt"><input type="radio" name="q5" value="0"> <span>Not in place</span></label>
+            <label class="q-opt"><input type="radio" name="q5" value="1"> <span>Rarely / minimal</span></label>
+            <label class="q-opt"><input type="radio" name="q5" value="2"> <span>Partially in place</span></label>
+            <label class="q-opt"><input type="radio" name="q5" value="3"> <span>Mostly in place</span></label>
+            <label class="q-opt"><input type="radio" name="q5" value="4"> <span>Fully in place</span></label>
+          </div>
+        </div>
+        <div class="q-block" id="q6">
+          <div class="q-num">Q6 of 12</div>
+          <div class="q-dim" style="color:#1E3651">Human Oversight & Override Protocols</div>
+          <p class="q-text">Can a staff member override an AI recommendation without documentation burden, disciplinary risk, or workflow friction that effectively coerces deference to the algorithm?</p>
+          <div class="q-options">
+            <label class="q-opt"><input type="radio" name="q6" value="0"> <span>Not in place</span></label>
+            <label class="q-opt"><input type="radio" name="q6" value="1"> <span>Rarely / minimal</span></label>
+            <label class="q-opt"><input type="radio" name="q6" value="2"> <span>Partially in place</span></label>
+            <label class="q-opt"><input type="radio" name="q6" value="3"> <span>Mostly in place</span></label>
+            <label class="q-opt"><input type="radio" name="q6" value="4"> <span>Fully in place</span></label>
+          </div>
+        </div>
+        <div class="q-block" id="q7">
+          <div class="q-num">Q7 of 12</div>
+          <div class="q-dim" style="color:#1E3651">Plain-Language Communication to Affected Parties</div>
+          <p class="q-text">Are individuals informed when an AI tool has contributed to a legal decision affecting them — in plain language, before the decision is finalized?</p>
+          <div class="q-options">
+            <label class="q-opt"><input type="radio" name="q7" value="0"> <span>Not in place</span></label>
+            <label class="q-opt"><input type="radio" name="q7" value="1"> <span>Rarely / minimal</span></label>
+            <label class="q-opt"><input type="radio" name="q7" value="2"> <span>Partially in place</span></label>
+            <label class="q-opt"><input type="radio" name="q7" value="3"> <span>Mostly in place</span></label>
+            <label class="q-opt"><input type="radio" name="q7" value="4"> <span>Fully in place</span></label>
+          </div>
+        </div>
+        <div class="q-block" id="q8">
+          <div class="q-num">Q8 of 12</div>
+          <div class="q-dim" style="color:#1E3651">Plain-Language Communication to Affected Parties</div>
+          <p class="q-text">Do affected individuals have a meaningful opportunity to contest AI-generated assessments, and are they informed of this right at the point of impact?</p>
+          <div class="q-options">
+            <label class="q-opt"><input type="radio" name="q8" value="0"> <span>Not in place</span></label>
+            <label class="q-opt"><input type="radio" name="q8" value="1"> <span>Rarely / minimal</span></label>
+            <label class="q-opt"><input type="radio" name="q8" value="2"> <span>Partially in place</span></label>
+            <label class="q-opt"><input type="radio" name="q8" value="3"> <span>Mostly in place</span></label>
+            <label class="q-opt"><input type="radio" name="q8" value="4"> <span>Fully in place</span></label>
+          </div>
+        </div>
+        <div class="q-block" id="q9">
+          <div class="q-num">Q9 of 12</div>
+          <div class="q-dim" style="color:#1E3651">Accountability & Error Correction</div>
+          <p class="q-text">Does your organization have a documented process for identifying, reporting, and correcting errors produced by AI tools — including a timeline for response and a mechanism for notifying affected individuals?</p>
+          <div class="q-options">
+            <label class="q-opt"><input type="radio" name="q9" value="0"> <span>Not in place</span></label>
+            <label class="q-opt"><input type="radio" name="q9" value="1"> <span>Rarely / minimal</span></label>
+            <label class="q-opt"><input type="radio" name="q9" value="2"> <span>Partially in place</span></label>
+            <label class="q-opt"><input type="radio" name="q9" value="3"> <span>Mostly in place</span></label>
+            <label class="q-opt"><input type="radio" name="q9" value="4"> <span>Fully in place</span></label>
+          </div>
+        </div>
+        <div class="q-block" id="q10">
+          <div class="q-num">Q10 of 12</div>
+          <div class="q-dim" style="color:#1E3651">Accountability & Error Correction</div>
+          <p class="q-text">When an AI tool produces an outcome later found to be incorrect or biased, does your organization have a formal process for remediation of harm to affected individuals?</p>
+          <div class="q-options">
+            <label class="q-opt"><input type="radio" name="q10" value="0"> <span>Not in place</span></label>
+            <label class="q-opt"><input type="radio" name="q10" value="1"> <span>Rarely / minimal</span></label>
+            <label class="q-opt"><input type="radio" name="q10" value="2"> <span>Partially in place</span></label>
+            <label class="q-opt"><input type="radio" name="q10" value="3"> <span>Mostly in place</span></label>
+            <label class="q-opt"><input type="radio" name="q10" value="4"> <span>Fully in place</span></label>
+          </div>
+        </div>
+        <div class="q-block" id="q11">
+          <div class="q-num">Q11 of 12</div>
+          <div class="q-dim" style="color:#1E3651">Community Input & Governance Structures</div>
+          <p class="q-text">Does your organization have a formal mechanism for community members — particularly those most affected by AI-assisted legal decisions — to provide input on AI tool adoption, design, and discontinuation?</p>
+          <div class="q-options">
+            <label class="q-opt"><input type="radio" name="q11" value="0"> <span>Not in place</span></label>
+            <label class="q-opt"><input type="radio" name="q11" value="1"> <span>Rarely / minimal</span></label>
+            <label class="q-opt"><input type="radio" name="q11" value="2"> <span>Partially in place</span></label>
+            <label class="q-opt"><input type="radio" name="q11" value="3"> <span>Mostly in place</span></label>
+            <label class="q-opt"><input type="radio" name="q11" value="4"> <span>Fully in place</span></label>
+          </div>
+        </div>
+        <div class="q-block" id="q12">
+          <div class="q-num">Q12 of 12</div>
+          <div class="q-dim" style="color:#1E3651">Community Input & Governance Structures</div>
+          <p class="q-text">Is there a governance body or process with genuine decision-making authority over AI tool use in your organization that includes perspectives beyond legal and technical staff?</p>
+          <div class="q-options">
+            <label class="q-opt"><input type="radio" name="q12" value="0"> <span>Not in place</span></label>
+            <label class="q-opt"><input type="radio" name="q12" value="1"> <span>Rarely / minimal</span></label>
+            <label class="q-opt"><input type="radio" name="q12" value="2"> <span>Partially in place</span></label>
+            <label class="q-opt"><input type="radio" name="q12" value="3"> <span>Mostly in place</span></label>
+            <label class="q-opt"><input type="radio" name="q12" value="4"> <span>Fully in place</span></label>
+          </div>
+        </div>
+    <div class="gate" id="gate">
+      <div class="gate-title">Your results are ready.</div>
+      <p class="gate-sub">Enter your organization email to receive your tier report and dimension scores.</p>
+      <input type="email" class="gate-input" id="gate-email" placeholder="you@organization.com">
+      <button class="gate-btn" onclick="submitGate()">See My Results →</button>
+    </div>
+    <div class="results" id="results">
+      <div class="tier-banner" id="tier-banner">
+        <div class="tier-label">Your Readiness Tier</div>
+        <div class="tier-name" id="tier-name">—</div>
+        <div class="tier-score" id="tier-score">—</div>
+      </div>
+      <div class="dims-section">
+        <div class="dims-title">Dimension Scores</div>
+        
+            <div class="dim-row">
+              <div class="dim-label">AI Tool Transparency & Explainability</div>
+              <div class="dim-bar-wrap"><div class="dim-bar" id="bar-0" style="background:#1E3651"></div></div>
+              <div class="dim-score" id="score-0">—</div>
+            </div>
+            <div class="dim-row">
+              <div class="dim-label">Bias Audit & Demographic Impact</div>
+              <div class="dim-bar-wrap"><div class="dim-bar" id="bar-1" style="background:#1E3651"></div></div>
+              <div class="dim-score" id="score-1">—</div>
+            </div>
+            <div class="dim-row">
+              <div class="dim-label">Human Oversight & Override Protocols</div>
+              <div class="dim-bar-wrap"><div class="dim-bar" id="bar-2" style="background:#1E3651"></div></div>
+              <div class="dim-score" id="score-2">—</div>
+            </div>
+            <div class="dim-row">
+              <div class="dim-label">Plain-Language Communication to Affected Parties</div>
+              <div class="dim-bar-wrap"><div class="dim-bar" id="bar-3" style="background:#1E3651"></div></div>
+              <div class="dim-score" id="score-3">—</div>
+            </div>
+            <div class="dim-row">
+              <div class="dim-label">Accountability & Error Correction</div>
+              <div class="dim-bar-wrap"><div class="dim-bar" id="bar-4" style="background:#1E3651"></div></div>
+              <div class="dim-score" id="score-4">—</div>
+            </div>
+            <div class="dim-row">
+              <div class="dim-label">Community Input & Governance Structures</div>
+              <div class="dim-bar-wrap"><div class="dim-bar" id="bar-5" style="background:#1E3651"></div></div>
+              <div class="dim-score" id="score-5">—</div>
+            </div>
+      </div>
+      <div class="rec-section">
+        <div class="rec-title">Your Priority Recommendations</div>
+        <p class="rec-text" id="rec-text">—</p>
+      </div>
+      <div class="cta-block">
+        <h3>Ready to go deeper?</h3>
+        <p>A 20-minute discovery call covers your highest-priority dimension and what a full advisory engagement would address.</p>
+        <a class="cta-btn" href="https://outlook.office.com/bookwithme/user/3ff7c8299177431a8fc2b099238c5e43@northeastern.edu?anonymous&ismsaljsauthenabled&ep=plink" target="_blank" rel="noopener noreferrer">Book a Discovery Call</a>
+        <button class="copy-btn" onclick="copyResults()">Copy Results to Clipboard</button>
+      </div>
+      <p style="text-align:center;font-size:0.78rem;color:var(--text-muted);margin-top:0.5rem;">
+        <a href="https://nsag-site.vercel.app" style="color:var(--nsag);">← Return to NSAG</a>
+      </p>
+    </div>
+  </div>
+</div>
+<footer>
+  <p>NSAG · Nervous-System-Aware Governance · Honolulu, Hawaiʻi</p>
+  <p style="margin-top:0.3rem;"><a href="https://nsag-site.vercel.app">nsag-site.vercel.app</a> &nbsp;·&nbsp; <a href="mailto:collins.ra@northeastern.edu">Contact the Architect</a></p>
+</footer>
+<script>
+var answers={};var current=0;var total=12;var dimMap=[0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5];var numDims=6;
+function startAssessment(){document.getElementById('intro-card').style.display='none';document.getElementById('progress-wrap').style.display='block';showQuestion(0);}
+function showQuestion(idx){
+  document.querySelectorAll('.q-block').forEach(function(el){el.classList.remove('active');});
+  var el=document.getElementById('q'+(idx+1));if(!el)return;
+  el.classList.add('active');
+  var existing=el.querySelector('.q-nav');if(existing)existing.remove();
+  var nav=document.createElement('div');nav.className='q-nav';
+  if(idx>0){var prev=document.createElement('button');prev.className='btn-prev';prev.textContent='← Back';prev.onclick=function(){showQuestion(idx-1);};nav.appendChild(prev);}
+  var next=document.createElement('button');next.className='btn-next';
+  next.textContent=idx===total-1?'See Results →':'Next →';
+  next.disabled=answers[idx]===undefined;
+  next.onclick=function(){if(answers[idx]===undefined)return;if(idx===total-1){showGate();}else{showQuestion(idx+1);}};
+  nav.appendChild(next);el.appendChild(nav);
+  el.querySelectorAll('input[type=radio]').forEach(function(r){
+    r.onchange=function(){answers[idx]=parseInt(this.value);el.querySelectorAll('.q-opt').forEach(function(o){o.classList.remove('selected');});this.closest('.q-opt').classList.add('selected');next.disabled=false;};
+    if(answers[idx]!==undefined&&parseInt(r.value)===answers[idx]){r.checked=true;r.closest('.q-opt').classList.add('selected');}
+  });
+  var pct=Math.round((idx/total)*100);
+  document.getElementById('progress-bar').style.width=pct+'%';
+  document.getElementById('progress-text').textContent='Question '+(idx+1)+' of '+total;
+  current=idx;
+}
+function showGate(){document.querySelectorAll('.q-block').forEach(function(el){el.classList.remove('active');});document.getElementById('progress-bar').style.width='100%';document.getElementById('progress-text').textContent='Assessment complete';document.getElementById('gate').classList.add('active');}
+function submitGate(){
+  var email=document.getElementById('gate-email').value.trim();
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){document.getElementById('gate-email').focus();return;}
+  fetch('https://nsag-api.vercel.app/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,source:'m2_assessment',module:'m2'})}).then(function(){showResults();}).catch(function(){showResults();});
+}
+function showResults(){
+  document.getElementById('gate').classList.remove('active');document.getElementById('results').classList.add('active');
+  var dimScores=new Array(numDims).fill(0);var dimCounts=new Array(numDims).fill(0);
+  for(var i=0;i<total;i++){var val=answers[i]!==undefined?answers[i]:0;dimScores[dimMap[i]]+=val;dimCounts[dimMap[i]]++;}
+  var totalScore=0;for(var i=0;i<total;i++)totalScore+=(answers[i]!==undefined?answers[i]:0);
+  var pct=Math.round((totalScore/(total*4))*100);
+  var tier,tierColor,tierRec;
+  if(pct>=80){tier='PIONEERING';tierColor='#2E5A28';tierRec='Your organization has built infrastructure for transparent, accountable, and community-governed AI use in legal contexts. You are operating ahead of most legal institutions — and ahead of most current regulatory requirements. Priority: publish your governance standards, contribute to emerging AI-in-courts policy conversations, and document your bias audit methodology for peer learning.';}
+  else if(pct>=55){tier='EMERGING';tierColor='#1B7A68';tierRec='Your organization has meaningful accountability structures but significant gaps remain — particularly in community governance and plain-language communication to affected parties. Priority: establish a formal affected-party notification protocol, create a community advisory structure with genuine authority, and conduct your first independent demographic impact audit of each AI tool in use.';}
+  else if(pct>=35){tier='DEVELOPING';tierColor='#B8842A';tierRec='Your organization is using AI tools in legal decision-making without adequate transparency, audit, or oversight infrastructure. Priority: commission an independent inventory and audit of all AI tools currently influencing decisions, establish a human override protocol that is genuinely usable, and develop a plain-language disclosure template.';}
+  else{tier='EARLY STAGE';tierColor='#6B2937';tierRec='Your organization is applying AI tools in high-stakes legal contexts without governance infrastructure adequate to the constitutional and ethical implications. Priority: immediately pause expansion of AI tool use, conduct an emergency audit of all current tools, and establish minimum transparency standards before any new AI tools are adopted.';}
+  document.getElementById('tier-banner').style.background=tierColor;
+  document.getElementById('tier-name').textContent=tier;
+  document.getElementById('tier-score').textContent=pct+'% overall · '+totalScore+' of '+(total*4)+' points';
+  document.getElementById('rec-text').textContent=tierRec;
+  var dimNames=['AI Tool Transparency & Explainability', 'Bias Audit & Demographic Impact', 'Human Oversight & Override Protocols', 'Plain-Language Communication to Affected Parties', 'Accountability & Error Correction', 'Community Input & Governance Structures'];
+  for(var d=0;d<numDims;d++){
+    var dpct=dimCounts[d]>0?Math.round((dimScores[d]/(dimCounts[d]*4))*100):0;
+    var bar=document.getElementById('bar-'+d);var score=document.getElementById('score-'+d);
+    if(bar){(function(b,p){setTimeout(function(){b.style.width=p+'%';},100);})(bar,dpct);}
+    if(score)score.textContent=dpct+'%';
+  }
+}
+function copyResults(){
+  var dimNames=['AI Tool Transparency & Explainability', 'Bias Audit & Demographic Impact', 'Human Oversight & Override Protocols', 'Plain-Language Communication to Affected Parties', 'Accountability & Error Correction', 'Community Input & Governance Structures'];
+  var dimScores=new Array(numDims).fill(0);var dimCounts=new Array(numDims).fill(0);
+  for(var i=0;i<total;i++){var val=answers[i]!==undefined?answers[i]:0;dimScores[dimMap[i]]+=val;dimCounts[dimMap[i]]++;}
+  var totalScore=0;for(var i=0;i<total;i++)totalScore+=(answers[i]!==undefined?answers[i]:0);
+  var pct=Math.round((totalScore/(total*4))*100);
+  var tier=pct>=80?'PIONEERING':pct>=55?'EMERGING':pct>=35?'DEVELOPING':'EARLY STAGE';
+  var text='NSAG M2 — AI Legal Navigation Readiness Assessment\nOverall: '+pct+'% · '+tier+'\n\nDimension Scores:\n';
+  for(var d=0;d<numDims;d++){var dpct=dimCounts[d]>0?Math.round((dimScores[d]/(dimCounts[d]*4))*100):0;text+='  '+dimNames[d]+': '+dpct+'%\n';}
+  text+='\nnsag-site.vercel.app';
+  if(navigator.clipboard){navigator.clipboard.writeText(text).then(function(){var btn=document.querySelector('.copy-btn');btn.textContent='✓ Copied';setTimeout(function(){btn.textContent='Copy Results to Clipboard';},2000);});}
+}
+</script>
+</body>
+</html>
