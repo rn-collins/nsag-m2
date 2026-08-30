@@ -1,6 +1,6 @@
-# NSAG M2 — Risk & Compliance
+# NSAG M2 — AI Legal Navigation
 
-Retired NSAG prototype module covering Risk & Compliance.
+Retired standalone deployment of NSAG module M2, AI Legal Navigation (Legal & Justice). The module's canonical page is https://nsag-site.vercel.app/m2.
 
 **Live:** https://nsag-m2.vercel.app
 
@@ -10,7 +10,7 @@ This prototype has been retired. The deployment remains online as a record; it i
 
 ## Repository contents
 
-`index.html`, `vercel.json`
+`index.html`, `vercel.json`, `og.png`, `favicon.svg`, `apple-touch-icon.png`
 
 ## Local development
 
